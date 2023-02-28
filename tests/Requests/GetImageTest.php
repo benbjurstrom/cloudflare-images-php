@@ -30,5 +30,3 @@ test('get image endpoint', function () {
         ->and($data->variants[0])
         ->toContain('https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public?sig=');
 });
-
-
