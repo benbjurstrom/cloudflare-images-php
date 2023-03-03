@@ -2,7 +2,6 @@
 
 namespace BenBjurstrom\CloudflareImages;
 
-use BenBjurstrom\Replicate\PredictionResource;
 use Saloon\Http\Connector;
 
 class CloudflareImages extends Connector

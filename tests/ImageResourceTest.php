@@ -37,7 +37,6 @@ test('image get', function () {
         ->toBe('00000000-0000-0000-0000-000000000000');
 });
 
-
 test('image delete', function () {
     $mockClient = new MockClient([
         DeleteImage::class => MockResponse::fixture('deleteImage'),

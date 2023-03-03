@@ -5,7 +5,6 @@ namespace BenBjurstrom\CloudflareImages\Requests;
 use BenBjurstrom\CloudflareImages\Data\ImageData;
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Contracts\Response;
-use Saloon\Data\MultipartValue;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Traits\Body\HasMultipartBody;

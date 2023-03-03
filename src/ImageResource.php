@@ -21,22 +21,22 @@ class ImageResource extends Resource
      */
     protected ?array $metadata = null;
 
-    protected ?bool $private  = null;
+    protected ?bool $private = null;
 
     public function getList(?int $perPage = null, ?int $page = null): ImagesData
     {
         $request = new GetImages();
 
-        if($page) {
+        if ($page) {
             $request->query()->add('page', $page);
         }
-        if($perPage){
+        if ($perPage) {
             $request->query()->add('per_page', $perPage);
         }
 
         $response = $this->connector->send($request);
         $data = $response->dtoOrFail();
-        if(! $data instanceof ImagesData) {
+        if (! $data instanceof ImagesData) {
             throw new Exception('Unexpected data type');
         }
 
@@ -49,7 +49,7 @@ class ImageResource extends Resource
         $response = $this->connector->send($request);
 
         $data = $response->dtoOrFail();
-        if(! $data instanceof ImageData) {
+        if (! $data instanceof ImageData) {
             throw new Exception('Unexpected data type');
         }
 
@@ -67,22 +67,22 @@ class ImageResource extends Resource
     public function update(string $id): ImageData
     {
         $request = new PatchImage($id);
-        if($this->metadata) {
+        if ($this->metadata) {
             $request->body()->merge([
-                'metadata' => json_encode($this->metadata, JSON_THROW_ON_ERROR)
+                'metadata' => json_encode($this->metadata, JSON_THROW_ON_ERROR),
             ]);
         }
 
-        if(!is_null($this->private)) {
+        if (! is_null($this->private)) {
             $request->body()->merge([
-                'require_signed_urls' => $this->private ? 'true' : 'false'
+                'require_signed_urls' => $this->private ? 'true' : 'false',
             ]);
         }
 
         $response = $this->connector->send($request);
 
         $data = $response->dtoOrFail();
-        if(! $data instanceof ImageData) {
+        if (! $data instanceof ImageData) {
             throw new Exception('Unexpected data type');
         }
 
@@ -97,7 +97,7 @@ class ImageResource extends Resource
         $response = $this->connector->send($request);
 
         $data = $response->dtoOrFail();
-        if(! $data instanceof ImageData) {
+        if (! $data instanceof ImageData) {
             throw new Exception('Unexpected data type');
         }
 
@@ -113,7 +113,7 @@ class ImageResource extends Resource
         $response = $this->connector->send($request);
 
         $data = $response->dtoOrFail();
-        if(! $data instanceof UploadUrlData) {
+        if (! $data instanceof UploadUrlData) {
             throw new Exception('Unexpected data type');
         }
 
@@ -123,23 +123,25 @@ class ImageResource extends Resource
     public function private(?bool $private = true): self
     {
         $this->private = $private;
+
         return $this;
     }
 
     /**
-     * @param array<string, string> $metadata
+     * @param  array<string, string>  $metadata
      */
     public function withMetadata(array $metadata): self
     {
         $this->metadata = $metadata;
+
         return $this;
     }
 
     protected function mergePrivacy(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
     {
-        if(!is_null($this->private)) {
+        if (! is_null($this->private)) {
             $request->body()->merge([
-                new MultipartValue(name: 'require_signed_urls', value: $this->private ? 'true' : 'false')
+                new MultipartValue(name: 'require_signed_urls', value: $this->private ? 'true' : 'false'),
             ]);
         }
 
@@ -148,9 +150,9 @@ class ImageResource extends Resource
 
     protected function mergeMetadata(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
     {
-        if($this->metadata) {
+        if ($this->metadata) {
             $request->body()->merge([
-                new MultipartValue(name: 'metadata', value: json_encode($this->metadata, JSON_THROW_ON_ERROR))
+                new MultipartValue(name: 'metadata', value: json_encode($this->metadata, JSON_THROW_ON_ERROR)),
             ]);
         }
 
