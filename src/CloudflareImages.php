@@ -2,6 +2,7 @@
 
 namespace BenBjurstrom\CloudflareImages;
 
+use BenBjurstrom\Replicate\PredictionResource;
 use Saloon\Http\Connector;
 
 class CloudflareImages extends Connector
@@ -19,5 +20,10 @@ class CloudflareImages extends Connector
             'https://api.cloudflare.com/client/v4/accounts/%s/images',
             $this->accountId
         );
+    }
+
+    public function image(): ImageResource
+    {
+        return new ImageResource($this);
     }
 }

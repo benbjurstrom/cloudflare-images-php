@@ -15,6 +15,14 @@ use BenBjurstrom\CloudflareImages\CloudflareImages;
 use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
 use BenBjurstrom\CloudflareImages\Requests\PostUploadUrl;
 ...
+$api = new CloudflareImages($apiToken, $accountId)
+
+$api->getPage(1, 20);
+$api->get($id);
+$api->delete($id);
+$api->update($id, ?$metadata, ?$private)
+$api->create($url, ?$metadata, ?$private);    
+$api->uploadUrl($metadata, ?$private, ?$customId);
 
 $connector = new CloudflareImages($apiToken, $accountId);
 $request   = new PostUploadUrl();
