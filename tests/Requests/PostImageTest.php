@@ -13,12 +13,8 @@ test('post image endpoint', function () {
     $connector = getConnector();
     $connector->withMockClient($mockClient);
 
-    $metadata = json_encode([
-        'name' => 'Example.jpg',
-        'description' => 'This is an example image',
-    ]);
     $url = 'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg';
-    $request = new PostImage(url: $url, metadata: $metadata);
+    $request = new PostImage(url: $url);
     $response = $connector->send($request);
 
     /* @var ImageData $data */
@@ -29,7 +25,5 @@ test('post image endpoint', function () {
         ->and($data->id)
         ->toBe('00000000-0000-0000-0000-000000000000')
         ->and($data->variants[0])
-        ->toBe('https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public')
-        ->and($data->metadata['name'])
-        ->toBe('Example.jpg');
+        ->toBe('https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public');
 });

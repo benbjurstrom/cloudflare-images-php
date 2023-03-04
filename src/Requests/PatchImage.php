@@ -15,30 +15,14 @@ class PatchImage extends Request implements HasBody
 
     protected Method $method = Method::PATCH;
 
-    /**
-     * @param  array<string, string>|null  $metadata
-     */
     public function __construct(
-        protected string $id,
-        protected ?array $metadata = null,
-        protected ?string $requireSignedURLs = null,
+        protected string $id
     ) {
     }
 
     public function resolveEndpoint(): string
     {
         return sprintf('/v1/%s', $this->id);
-    }
-
-    /**
-     * @return array<string, array<string, string>|string>
-     */
-    protected function defaultBody(): array
-    {
-        return [
-            ...($this->metadata ? ['metadata' => $this->metadata] : []),
-            ...($this->requireSignedURLs ? ['require_signed_urls' => $this->requireSignedURLs] : []),
-        ];
     }
 
     public function createDtoFromResponse(Response $response): ImageData

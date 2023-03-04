@@ -13,7 +13,7 @@ test('get images endpoint', function () {
     $connector = getConnector();
     $connector->withMockClient($mockClient);
 
-    $request = new GetImages(page: 1, perPage: 1);
+    $request = new GetImages();
     $response = $connector->send($request);
 
     /* @var ImagesData $data */

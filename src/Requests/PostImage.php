@@ -18,8 +18,6 @@ class PostImage extends Request implements HasBody
 
     public function __construct(
         protected string $url,
-        protected ?string $metadata = null,
-        protected ?string $requireSignedURLs = null,
     ) {
     }
 
@@ -35,12 +33,6 @@ class PostImage extends Request implements HasBody
     {
         return [
             new MultipartValue(name: 'url', value: $this->url),
-            ...($this->metadata ? [
-                new MultipartValue(name: 'metadata', value: $this->metadata),
-            ] : []),
-            ...($this->requireSignedURLs ? [
-                new MultipartValue(name: 'require_signed_urls', value: $this->requireSignedURLs),
-            ] : []),
         ];
     }
 

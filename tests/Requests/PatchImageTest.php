@@ -13,13 +13,8 @@ test('patch image endpoint', function () {
     $connector = getConnector();
     $connector->withMockClient($mockClient);
 
-    $metadata = [
-        'name' => 'Example2.jpg',
-        'description' => 'This is also example image',
-        'user_id' => '123',
-    ];
     $id = '00000000-0000-0000-0000-000000000000';
-    $request = new PatchImage(id: $id, metadata: $metadata);
+    $request = new PatchImage(id: $id);
     $response = $connector->send($request);
 
     /* @var ImageData $data */

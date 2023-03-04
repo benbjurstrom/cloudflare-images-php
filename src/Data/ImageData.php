@@ -37,18 +37,4 @@ final class ImageData
             metadata: $data['meta'] ?? [],
         );
     }
-
-    public function signUrls(string $signingKey): void
-    {
-        if ($this->requireSignedURLs) {
-            foreach ($this->variants as $key => $variant) {
-                $urlPath = parse_url($variant, PHP_URL_PATH);
-                if (! $urlPath) {
-                    continue;
-                }
-                $sig = hash_hmac('sha256', $urlPath, $signingKey);
-                $this->variants[$key] = $variant.'?sig='.$sig;
-            }
-        }
-    }
 }
