@@ -12,7 +12,6 @@ use BenBjurstrom\CloudflareImages\Requests\PatchImage;
 use BenBjurstrom\CloudflareImages\Requests\PostImage;
 use BenBjurstrom\CloudflareImages\Requests\PostUploadUrl;
 use Exception;
-use Saloon\Data\MultipartValue;
 
 class ImageResource extends Resource
 {
@@ -68,15 +67,11 @@ class ImageResource extends Resource
     {
         $request = new PatchImage($id);
         if ($this->metadata) {
-            $request->body()->merge([
-                'metadata' => json_encode($this->metadata, JSON_THROW_ON_ERROR),
-            ]);
+            $request->body()->add('metadata', $this->metadata);
         }
 
         if (! is_null($this->private)) {
-            $request->body()->merge([
-                'require_signed_urls' => $this->private ? 'true' : 'false',
-            ]);
+            $request->body()->add('requireSignedURLs', $this->private);
         }
 
         $response = $this->connector->send($request);
@@ -140,9 +135,10 @@ class ImageResource extends Resource
     protected function mergePrivacy(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
     {
         if (! is_null($this->private)) {
-            $request->body()->merge([
-                new MultipartValue(name: 'require_signed_urls', value: $this->private ? 'true' : 'false'),
-            ]);
+            $request->body()->add(
+                name: 'requireSignedURLs',
+                contents: $this->private ? 'true' : 'false',
+            );
         }
 
         return $request;
@@ -151,9 +147,10 @@ class ImageResource extends Resource
     protected function mergeMetadata(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
     {
         if ($this->metadata) {
-            $request->body()->merge([
-                new MultipartValue(name: 'metadata', value: json_encode($this->metadata, JSON_THROW_ON_ERROR)),
-            ]);
+            $request->body()->add(
+                name: 'metadata',
+                contents: json_encode($this->metadata, JSON_THROW_ON_ERROR)
+            );
         }
 
         return $request;

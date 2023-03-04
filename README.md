@@ -1,7 +1,7 @@
 # Cloudflare Images PHP client
 This is a framework-agnostic PHP client for [Cloudflare Images](https://developers.cloudflare.com/images/cloudflare-images/) built on the amazing [Saloon v2](https://docs.saloon.dev/) 🤠 library.
 
-## Quick start 🎉
+## 🚀 Quick start
 
 Install with composer.
 
@@ -9,69 +9,120 @@ Install with composer.
 composer require benbjurstrom/cloudflare-images-php
 ```
 
-Instantiate the connector with your Cloudflare API token and Account ID. Pick one of the included request objects and pass it to the connector's `send` method. Finally, exchange the response object for one of the included Data Transfer Objects.
+Use your Cloudflare API token and Account ID to create a new api instance.
 ```php
 use BenBjurstrom\CloudflareImages\CloudflareImages;
-use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
-use BenBjurstrom\CloudflareImages\Requests\PostUploadUrl;
 ...
-$api = new CloudflareImages($apiToken, $accountId)
 
-$api->getPage(1, 20);
-$api->get($id);
-$api->delete($id);
-$api->update($id, ?$metadata, ?$private)
-$api->create($url, ?$metadata, ?$private);    
-$api->uploadUrl($metadata, ?$private, ?$customId);
+$api = new CloudflareImages(
+    apiToken: $_ENV['CLOUDFLARE_IMAGES_API_TOKEN'],
+    accountId: $_ENV['CLOUDFLARE_IMAGES_ACCOUNT_ID']
+);
+```
+Then use the api instance to get details about an image such as its file name, metadata, and available variants.
+```php
+use BenBjurstrom\CloudflareImages\Data\ImageData;
+...
 
-$connector = new CloudflareImages($apiToken, $accountId);
-$request   = new PostUploadUrl();
-$response  = $connector->send($request);
+$id = '00000000-0000-0000-0000-000000000000'
+/* @var ImageData $data */
+$data = $api->image()->get($id);
+$data->variants[0]; // https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public
+```
+
+Or generate a one time upload url that lets your users upload images directly to cloudflare without exposing your api key.
+```php
+use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
+...
 
 /* @var UploadUrlData $data */
-$data = $response->dtoOrFail();
-
+$data = $api->image()
+    ->private(false) // optional
+    ->withMetadata(['user_id' => '123']) // optional
+    ->getUploadUrl();
 $data->uploadUrl; // https://upload.imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000"
+
 ```
 
-For more details on the lifecycle check out Saloon's documentation on [Connectors](https://docs.saloon.dev/the-basics/connectors), [Requests](https://docs.saloon.dev/the-basics/requests), [Responses](https://docs.saloon.dev/the-basics/responses) and [DTOs](https://docs.saloon.dev/the-basics/data-transfer-objects).
+You can find more information about direct creator uploads in the [Cloudflare Docs](https://developers.cloudflare.com/images/cloudflare-images/upload-images/direct-creator-upload/).
 
-## Other Request Object Examples
-### GetImage
-Fetches image details by ID.
+## Response Data
+All responses are returned as data objects. Detailed information on the available data can be found by inspecting the following class properties:
+
+* [ImageData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/ImageData.php)
+* [ImagesData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/ImagesData.php)
+* [UploadUrlData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/UploadUrlData.php)
+
+## Private Images
+Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private, chain `private(true)` onto your api intance before calling the `getUploadUrl`, `uploadFromUrl`, or `edit` methods. For example:
+
 ```php
-use BenBjurstrom\CloudflareImages\CloudflareImages;
-use BenBjurstrom\CloudflareImages\Data\ImageData
-use BenBjurstrom\CloudflareImages\Requests\GetImage;
+$api->image()->private(true)->getUploadUrl();
+```
+
+To generate signatures instantiate your api with the optional signing key parameter and then pass the url you want to sign to the `signUrl` method.
+```php
+$api = new CloudflareImages(
+    ...
+    $signingKey: $_ENV['CLOUDFLARE_IMAGES_SIGNING_KEY']
+);
+
+$url = 'https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public';
+$api->signUrl($url); // https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public?sig=8217cb17667a1f1af8ed722124d7a5da9543df9e3040a51f3de6e3023812ab3
+```
+
+You can find more information about serving private images in the [Cloudflare documentation](https://developers.cloudflare.com/images/cloudflare-images/signing-images/).
+
+## Other Methods
+### Get Image List
+
+```php
+use BenBjurstrom\CloudflareImages\Data\ImagesData
 ...
 
-$connector = new CloudflareImages($apiToken, $accountId);
-$request   = new GetImage($id);
-$response  = $connector->send($request);
+/* @var ImagesData $data */
+$data = $api->images()->getList(
+    page: 1, // optional
+    perPage: 25, // optional
+);
+
+$data->images[0]->id; // 00000000-0000-0000-0000-000000000000
+
+```
+### Upload From Url
+```php
+use BenBjurstrom\CloudflareImages\Data\ImageData
+...
+
+$url = 'https://en.wikipedia.org/wiki/File:Example.jpg'
 
 /* @var ImageData $data */
-$data = $response->dtoOrFail();
+$data = $api->image()
+    ->private(false) // optional
+    ->withMetadata(['user_id' => '123']) // optional
+    ->uploadFromUrl($id);
+```
+### Update Image
 
-// See the ImageData class for all available properties
-$data->variants[0]; // https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public
+⚠️ WARNING - Modifying an image's privacy setting will change the image's identifier.
 
-// For private images call the ImageData::signUrls method with your signing key
-$data->signUrls($signingKey)
-$data->variants[0]; // https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public?sig=8217cb17667a1f1af8ed722124d7a5da9543df9e3040a51f3de6e3023812ab3
-```
-### GetImages
-Fetches a list of images.
 ```php
+use BenBjurstrom\CloudflareImages\Data\ImageData
+...
+
+$id = '00000000-0000-0000-0000-000000000000'
+
+/* @var ImageData $data */
+$data = $api->image()
+    ->private(false) // optional
+    ->withMetadata(['user_id' => '123']) // optional
+    ->update($id);
+
+$data->id; // Contains a new id if the privacy setting was changed. Make sure to update your database.
 ```
-### PostImage
-Creates a new image from a given URL.
+### Delete Image
 ```php
-```
-### PatchImage
-Updates an image's details.
-```php
-```
-### DeleteImage
-Deletes and image by ID.
-```php
+$id = '00000000-0000-0000-0000-000000000000'
+$data = $api->image()->delete($id);
+$data // true
 ```
