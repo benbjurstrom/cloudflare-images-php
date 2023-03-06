@@ -16,24 +16,9 @@ class PostImage extends Request implements HasBody
 
     protected Method $method = Method::POST;
 
-    public function __construct(
-        protected string $url,
-    ) {
-    }
-
     public function resolveEndpoint(): string
     {
         return '/v1';
-    }
-
-    /**
-     * @return array<int, MultipartValue>
-     */
-    protected function defaultBody(): array
-    {
-        return [
-            new MultipartValue(name: 'url', value: $this->url),
-        ];
     }
 
     public function createDtoFromResponse(Response $response): ImageData

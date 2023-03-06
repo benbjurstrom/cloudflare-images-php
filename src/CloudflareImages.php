@@ -23,9 +23,14 @@ class CloudflareImages extends Connector
         );
     }
 
-    public function image(): ImageResource
+    public function images(): ImageResource
     {
         return new ImageResource($this);
+    }
+
+    public function variants(): VariantResource
+    {
+        return new VariantResource($this);
     }
 
     public function signUrl(string $url): string
