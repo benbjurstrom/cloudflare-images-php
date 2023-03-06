@@ -14,7 +14,11 @@ test('post image endpoint', function () {
     $connector->withMockClient($mockClient);
 
     $url = 'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg';
-    $request = new PostImage(url: $url);
+    $request = new PostImage();
+    $request->body()->add(
+        name: 'url',
+        contents: $url,
+    );
     $response = $connector->send($request);
 
     /* @var ImageData $data */

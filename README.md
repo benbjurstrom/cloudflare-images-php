@@ -26,8 +26,23 @@ use BenBjurstrom\CloudflareImages\Data\ImageData;
 
 $id = '00000000-0000-0000-0000-000000000000'
 /* @var ImageData $data */
-$data = $api->image()->get($id);
+$data = $api->images()->get($id);
 $data->variants[0]; // https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public
+```
+
+Or upload from an image string.
+```php
+use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
+...
+$fileName = 'example.jpg';
+$file = file_get_contents($fileName);
+
+/* @var ImageData $data */
+$data = $api->images()
+    ->private(false) // optional
+    ->withMetadata(['user_id' => '123']) // optional
+    ->upload($file, $fileName);
+$data->id; // 00000000-0000-0000-0000-000000000000
 ```
 
 Or generate a one time upload url that lets your users upload images directly to cloudflare without exposing your api key.
@@ -36,7 +51,7 @@ use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
 ...
 
 /* @var UploadUrlData $data */
-$data = $api->image()
+$data = $api->images()
     ->private(false) // optional
     ->withMetadata(['user_id' => '123']) // optional
     ->getUploadUrl();
@@ -52,12 +67,13 @@ All responses are returned as data objects. Detailed information on the availabl
 * [ImageData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/ImageData.php)
 * [ImagesData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/ImagesData.php)
 * [UploadUrlData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/UploadUrlData.php)
+* [VariantData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/VariantData.php)
 
 ## Private Images
-Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private, chain `private(true)` onto your api intance before calling the `getUploadUrl`, `uploadFromUrl`, or `edit` methods. For example:
+Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private, chain `private(true)` onto your api intance before calling the `getUploadUrl`, `uploadFromUrl`, or `update` methods. For example:
 
 ```php
-$api->image()->private(true)->getUploadUrl();
+$api->images()->private(true)->getUploadUrl();
 ```
 
 To generate signatures instantiate your api with the optional signing key parameter and then pass the url you want to sign to the `signUrl` method.
@@ -73,15 +89,15 @@ $api->signUrl($url); // https://imagedelivery.net/2222222222222222222222/0000000
 
 You can find more information about serving private images in the [Cloudflare documentation](https://developers.cloudflare.com/images/cloudflare-images/signing-images/).
 
-## Other Methods
-### Get Image List
+## Other Image Methods
+### Get A Paginated List of Images
 
 ```php
 use BenBjurstrom\CloudflareImages\Data\ImagesData
 ...
 
 /* @var ImagesData $data */
-$data = $api->images()->getList(
+$data = $api->images()->list(
     page: 1, // optional
     perPage: 25, // optional
 );
@@ -97,7 +113,7 @@ use BenBjurstrom\CloudflareImages\Data\ImageData
 $url = 'https://en.wikipedia.org/wiki/File:Example.jpg'
 
 /* @var ImageData $data */
-$data = $api->image()
+$data = $api->images()
     ->private(false) // optional
     ->withMetadata(['user_id' => '123']) // optional
     ->uploadFromUrl($id);
@@ -113,16 +129,29 @@ use BenBjurstrom\CloudflareImages\Data\ImageData
 $id = '00000000-0000-0000-0000-000000000000'
 
 /* @var ImageData $data */
-$data = $api->image()
+$data = $api->images()
     ->private(false) // optional
     ->withMetadata(['user_id' => '123']) // optional
     ->update($id);
 
-$data->id; // Contains a new id if the privacy setting was changed. Make sure to update your database.
+$data->id; // Contains a new id if the privacy setting was changed. If you are tracking IDs be sure to update your database.
 ```
 ### Delete Image
 ```php
 $id = '00000000-0000-0000-0000-000000000000'
-$data = $api->image()->delete($id);
+$data = $api->images()->delete($id);
 $data // true
+```
+
+## Variant Methods
+### Get All Variants
+```php
+use BenBjurstrom\CloudflareImages\Data\VariantsData
+...
+
+/* @var VariantsData $data */
+$data = $api->variants()->all()
+$data->variants[0]->id; // public
+$data->variants[0]->width; // 1366
+$data->variants[0]->height; // 768
 ```

@@ -17,7 +17,7 @@ test('image getList', function () {
     $connector = getConnector();
     $connector->withMockClient($mockClient);
 
-    $data = $connector->image()->getList();
+    $data = $connector->images()->list();
 
     expect($data->images[0]->id)
         ->toBe('00000000-0000-0000-0000-000000000001');
@@ -31,7 +31,7 @@ test('image get', function () {
     $connector = getConnector();
     $connector->withMockClient($mockClient);
 
-    $data = $connector->image()->get('00000000-0000-0000-0000-000000000000');
+    $data = $connector->images()->get('00000000-0000-0000-0000-000000000000');
 
     expect($data->id)
         ->toBe('00000000-0000-0000-0000-000000000000');
@@ -45,7 +45,7 @@ test('image delete', function () {
     $connector = getConnector();
     $connector->withMockClient($mockClient);
 
-    $data = $connector->image()->delete('00000000-0000-0000-0000-000000000000');
+    $data = $connector->images()->delete('00000000-0000-0000-0000-000000000000');
 
     expect($data)->toBeTrue();
 });
@@ -59,7 +59,7 @@ test('image update', function () {
     $connector->withMockClient($mockClient);
 
     $data = $connector
-        ->image()
+        ->images()
         ->private()
         ->withMetadata([
             'name' => 'test',
@@ -78,7 +78,7 @@ test('image uploadFromUrl', function () {
     $connector = getConnector();
     $connector->withMockClient($mockClient);
 
-    $data = $connector->image()->uploadFromUrl('https://example.com/image.jpg');
+    $data = $connector->images()->uploadFromUrl('https://example.com/image.jpg');
 
     expect($data->id)
         ->toBe('00000000-0000-0000-0000-000000000000');
@@ -93,12 +93,30 @@ test('image upload url', function () {
     $connector->withMockClient($mockClient);
 
     $data = $connector
-        ->image()
+        ->images()
         ->private()
         ->withMetadata([
             'name' => 'test',
         ])
         ->getUploadUrl();
+
+    expect($data->id)
+        ->toBe('00000000-0000-0000-0000-000000000000');
+});
+
+test('image uploadFromString', function () {
+    $mockClient = new MockClient([
+        PostImage::class => MockResponse::fixture('postImageFromString'),
+    ]);
+
+    $connector = getConnector();
+    $connector->withMockClient($mockClient);
+
+    $base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII';
+
+    $data = $connector
+        ->images()
+        ->upload(base64_decode($base64), 'test.png');
 
     expect($data->id)
         ->toBe('00000000-0000-0000-0000-000000000000');

@@ -13,7 +13,7 @@ final class ImageData
      */
     public function __construct(
         public string $id,
-        public string $filename,
+        public ?string $filename,
         public string $uploaded,
         public bool $requireSignedURLs,
         public array $variants,

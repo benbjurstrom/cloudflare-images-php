@@ -22,7 +22,7 @@ class ImageResource extends Resource
 
     protected ?bool $private = null;
 
-    public function getList(?int $perPage = null, ?int $page = null): ImagesData
+    public function list(?int $perPage = null, ?int $page = null): ImagesData
     {
         $request = new GetImages();
 
@@ -84,9 +84,34 @@ class ImageResource extends Resource
         return $data;
     }
 
+    public function upload(string $image, string $fileName): ImageData
+    {
+        $request = new PostImage();
+        $request->body()->add(
+            name: 'file',
+            contents: $image,
+            filename: $fileName
+        );
+        $request = $this->mergeMetadata($request);
+        $request = $this->mergePrivacy($request);
+        $response = $this->connector->send($request);
+
+        $data = $response->dtoOrFail();
+        if (! $data instanceof ImageData) {
+            throw new Exception('Unexpected data type');
+        }
+
+        return $data;
+    }
+
     public function uploadFromUrl(string $url): ImageData
     {
-        $request = new PostImage($url);
+        $request = new PostImage();
+        $request->body()->add(
+            name: 'url',
+            contents: $url,
+        );
+
         $request = $this->mergeMetadata($request);
         $request = $this->mergePrivacy($request);
         $response = $this->connector->send($request);
