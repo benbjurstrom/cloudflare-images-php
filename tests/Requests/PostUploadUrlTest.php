@@ -17,7 +17,11 @@ test('post upload url endpoint', function () {
         'name' => 'Example.jpg',
         'description' => 'This is an example image',
     ]);
-    $request = new PostUploadUrl($metadata);
+    $request = new PostUploadUrl();
+    $request->body()->add(
+        name: 'metadata',
+        contents: json_encode($metadata, JSON_THROW_ON_ERROR)
+    );
     $response = $connector->send($request);
 
     /* @var UploadUrlData $data */
