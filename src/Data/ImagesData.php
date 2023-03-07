@@ -30,6 +30,7 @@ final class ImagesData
                 requireSignedURLs: $image['requireSignedURLs'],
                 variants: $image['variants'],
                 metadata: $image['meta'] ?? [],
+                isDraft: $image['draft'] ?? false,
             );
         }
 

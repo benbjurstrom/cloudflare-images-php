@@ -22,6 +22,32 @@ class ImageResource extends Resource
 
     protected ?bool $private = null;
 
+    protected ?string $customId = null;
+
+    public function private(?bool $private = true): self
+    {
+        $this->private = $private;
+
+        return $this;
+    }
+
+    /**
+     * @param  array<string, string>  $metadata
+     */
+    public function withMetadata(array $metadata): self
+    {
+        $this->metadata = $metadata;
+
+        return $this;
+    }
+
+    public function withCustomId(string $id): self
+    {
+        $this->customId = $id;
+
+        return $this;
+    }
+
     public function list(?int $perPage = null, ?int $page = null): ImagesData
     {
         $request = new GetImages();
@@ -92,8 +118,9 @@ class ImageResource extends Resource
             contents: $image,
             filename: $fileName
         );
-        $request = $this->mergeMetadata($request);
-        $request = $this->mergePrivacy($request);
+        $request = $this->addMetadata($request);
+        $request = $this->addPrivacy($request);
+        $request = $this->addCustomId($request);
         $response = $this->connector->send($request);
 
         $data = $response->dtoOrFail();
@@ -112,8 +139,9 @@ class ImageResource extends Resource
             contents: $url,
         );
 
-        $request = $this->mergeMetadata($request);
-        $request = $this->mergePrivacy($request);
+        $request = $this->addMetadata($request);
+        $request = $this->addPrivacy($request);
+        $request = $this->addCustomId($request);
         $response = $this->connector->send($request);
 
         $data = $response->dtoOrFail();
@@ -127,8 +155,9 @@ class ImageResource extends Resource
     public function getUploadUrl(): UploadUrlData
     {
         $request = new PostUploadUrl();
-        $request = $this->mergeMetadata($request);
-        $request = $this->mergePrivacy($request);
+        $request = $this->addMetadata($request);
+        $request = $this->addPrivacy($request);
+        $request = $this->addCustomId($request);
 
         $response = $this->connector->send($request);
 
@@ -140,24 +169,7 @@ class ImageResource extends Resource
         return $data;
     }
 
-    public function private(?bool $private = true): self
-    {
-        $this->private = $private;
-
-        return $this;
-    }
-
-    /**
-     * @param  array<string, string>  $metadata
-     */
-    public function withMetadata(array $metadata): self
-    {
-        $this->metadata = $metadata;
-
-        return $this;
-    }
-
-    protected function mergePrivacy(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
+    protected function addPrivacy(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
     {
         if (! is_null($this->private)) {
             $request->body()->add(
@@ -169,12 +181,24 @@ class ImageResource extends Resource
         return $request;
     }
 
-    protected function mergeMetadata(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
+    protected function addMetadata(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
     {
         if ($this->metadata) {
             $request->body()->add(
                 name: 'metadata',
                 contents: json_encode($this->metadata, JSON_THROW_ON_ERROR)
+            );
+        }
+
+        return $request;
+    }
+
+    protected function addCustomId(PostUploadUrl|PostImage $request): PostUploadUrl|PostImage
+    {
+        if ($this->customId) {
+            $request->body()->add(
+                name: 'id',
+                contents: $this->customId
             );
         }
 

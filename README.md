@@ -1,6 +1,9 @@
 # Cloudflare Images PHP client
 This is a framework-agnostic PHP client for [Cloudflare Images](https://developers.cloudflare.com/images/cloudflare-images/) built on the amazing [Saloon v2](https://docs.saloon.dev/) 🤠 library.
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/benbjurstrom/cloudflare-images-php.svg?style=flat-square)](https://packagist.org/packages/benbjurstrom/cloudflare-images-php)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/benbjurstrom/cloudflare-images-php/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/benbjurstrom/cloudflare-images-php/actions?query=workflow%3tests+branch%3Amain)
+
 ## 🚀 Quick start
 
 Install with composer.

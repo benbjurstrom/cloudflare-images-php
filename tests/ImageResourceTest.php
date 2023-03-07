@@ -50,6 +50,19 @@ test('image delete', function () {
     expect($data)->toBeTrue();
 });
 
+test('image delete not found', function () {
+    $mockClient = new MockClient([
+        DeleteImage::class => MockResponse::fixture('deleteImageNotFound'),
+    ]);
+
+    $connector = getConnector();
+    $connector->withMockClient($mockClient);
+
+    $data = $connector->images()->delete('00000000-0000-0000-0000-000000000000');
+
+    expect($data)->toBeFalse();
+});
+
 test('image update', function () {
     $mockClient = new MockClient([
         PatchImage::class => MockResponse::fixture('patchImage'),
