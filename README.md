@@ -4,6 +4,24 @@ This is a framework-agnostic PHP client for [Cloudflare Images](https://develope
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/benbjurstrom/cloudflare-images-php.svg?style=flat-square)](https://packagist.org/packages/benbjurstrom/cloudflare-images-php)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/benbjurstrom/cloudflare-images-php/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/benbjurstrom/cloudflare-images-php/actions?query=workflow%3tests+branch%3Amain)
 
+## Table of contents
+- [Quick Start](https://github.com/benbjurstrom/cloudflare-images-php#quick-start)
+- [Using with Laravel](https://github.com/benbjurstrom/cloudflare-images-php#using-with-laravel)
+- [Response Data](https://github.com/benbjurstrom/cloudflare-images-php#response-data)
+- [Image Metadata](https://github.com/benbjurstrom/cloudflare-images-php#private-images)
+- [Private Images](https://github.com/benbjurstrom/cloudflare-images-php#private-images)
+- [Custom IDs](https://github.com/benbjurstrom/cloudflare-images-php#custom-ids)
+- [Image Methods](https://github.com/benbjurstrom/cloudflare-images-php#custom-ids)
+  - [get]()
+  - [list]()
+  - [update]()
+  - [delete]()
+  - [create]()
+  - [createFromUrl]()
+  - [getUploadUrl]()
+- [Variant Methods](https://github.com/benbjurstrom/cloudflare-images-php#variant-methods)
+  - [list](https://github.com/benbjurstrom/cloudflare-images-php#get-all-variants)
+
 ## 🚀 Quick start
 
 Install with composer.
@@ -22,49 +40,31 @@ $api = new CloudflareImages(
     accountId: $_ENV['CLOUDFLARE_IMAGES_ACCOUNT_ID']
 );
 ```
-Then use the api instance to get details about an image such as its file name, metadata, and available variants.
+Then use the api instance to get details about an existing image such as its file name, metadata, or available variants.
 ```php
-use BenBjurstrom\CloudflareImages\Data\ImageData;
-...
-
 $id = '2cdc28f0-017a-49c4-9ed7-87056c83901'
-/* @var ImageData $data */
 $data = $api->images()->get($id);
 $data->variants[0]; // https://imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/2cdc28f0-017a-49c4-9ed7-87056c83901/public
 ```
 
-Or upload from an image string.
+Or use the api to upload a new image from an image string.
 ```php
-use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
-...
 $fileName = 'example.jpg';
 $file = file_get_contents($fileName);
 
-/* @var ImageData $data */
-$data = $api->images()
-    ->private(false) // optional
-    ->withCustomId('test/image123') // optional
-    ->withMetadata(['user_id' => '123']) // optional
-    ->upload($file, $fileName);
-$data->id; // test/image123
+$data = $api->images()->upload($file, $fileName);
+$data->id; // 2cdc28f0-017a-49c4-9ed7-87056c83901
 ```
 
 Or generate a one time upload url that lets your users upload images directly to cloudflare without exposing your api key.
 ```php
-use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
-...
-
-/* @var UploadUrlData $data */
-$data = $api->images()
-    ->withMetadata(['user_id' => '123']) // optional
-    ->getUploadUrl();
+$data = $api->images()->getUploadUrl();
 $data->uploadUrl; // https://upload.imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/d63a6953-12b9-4d89-b8d6-083c86289b93
 ```
-
 You can find more information about direct creator uploads in the [Cloudflare Docs](https://developers.cloudflare.com/images/cloudflare-images/upload-images/direct-creator-upload/).
 
-## Using Laravel?
-Add your credentials to your services config file.
+## Using with Laravel
+It's easy to use this package in Laravel. Begin by adding your credentials to your services config file.
 ```php
 // config/services.php
 'cloudflare' => [
@@ -78,8 +78,6 @@ Bind the `CloudflareImages` class in a service provider.
 // app/Providers/AppServiceProvider.php
 public function register()
 {
-    parent::register();
-
     $this->app->bind(CloudflareImages::class, function () {
         return new CloudflareImages(
             apiToken: config('services.cloudflare.api_token'),
@@ -89,16 +87,14 @@ public function register()
     });
 }
 ````
-And use in your app
+And use anywhere in your application.
 ```php
-$imgData = app(CloudflareImages::class)
-            ->images()
-            ->get($this->id);
+$data = app(CloudflareImages::class)->images()->get($id);
 ```
 
-Then it's easy to mock the api in your tests using Saloon's amazing [Response Recording](https://docs.saloon.dev/testing/recording-requests#fixture-path).
+It's also really easy to test your integration using Saloon's amazing [response recording](https://docs.saloon.dev/testing/recording-requests#fixture-path).
 ```php
-use Saloon\Laravel\Saloon;
+use Saloon\Laravel\Saloon; // composer require sammyjo20/saloon-laravel "^2.0"
 ...
 Saloon::fake([
     MockResponse::fixture('getImage'),
@@ -108,16 +104,16 @@ $id = 'a74a4313-a51d-4837-b5c1-73e4c562ff00';
 
 // The initial request will check if a fixture called "getImage" 
 // exists. Because it doesn't exist yet, the real request will be
-// sent and the response will be recorded .
+// sent and the response will be recorded to tests/Fixtures/Saloon/getImage.json.
 $imgData = app(CloudflareImages::class)->images()->get($id);
 
 // However, the next time the request is made, the fixture will 
 // exist, and Saloon will not make the request again.
-$imgData = app(CloudflareImages::class)->images()->get($this->id);
+$imgData = app(CloudflareImages::class)->images()->get();
 ```
 
 ## Response Data
-All responses are returned as data objects. Detailed information on the available data can be found by inspecting the following class properties:
+All responses are returned as data objects. Detailed information can be found by inspecting the following class properties:
 
 * [ImageData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/ImageData.php)
 * [ImagesData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/ImagesData.php)
@@ -148,12 +144,13 @@ You can find more information about serving private images in the [Cloudflare do
 Cloudflare allows you to configure a custom identifier if you wish. To do so chain `withCustomId($id)` onto your api instance before calling the `getUploadUrl`, `uploadFromUrl`, or `update` methods. For example:
 
 ```php
-$api->images()->withCustomId($id)->getUploadUrl();
+$api->images()->withCustomId('test/image123')->upload($file, $fileName);
+$data->id; // test/image123
 ```
 
 Note that images with a custom ID cannot be made private. You can find more information about custom ids in the [Cloudflare documentation](https://developers.cloudflare.com/images/cloudflare-images/upload-images/custom-id/).
 
-## Other Image Methods
+## Available Image Methods
 ### Get A Paginated List of Images
 
 ```php
