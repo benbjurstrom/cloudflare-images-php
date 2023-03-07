@@ -110,7 +110,7 @@ class ImageResource extends Resource
         return $data;
     }
 
-    public function upload(string $image, string $fileName): ImageData
+    public function create(string $image, string $fileName): ImageData
     {
         $request = new PostImage();
         $request->body()->add(
@@ -131,7 +131,7 @@ class ImageResource extends Resource
         return $data;
     }
 
-    public function uploadFromUrl(string $url): ImageData
+    public function createFromUrl(string $url): ImageData
     {
         $request = new PostImage();
         $request->body()->add(
