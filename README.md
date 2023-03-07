@@ -29,6 +29,7 @@ Install with composer.
 ```bash
 composer require benbjurstrom/cloudflare-images-php
 ```
+### 
 
 Use your Cloudflare API token and Account ID to create a new api instance.
 ```php
@@ -40,12 +41,15 @@ $api = new CloudflareImages(
     accountId: $_ENV['CLOUDFLARE_IMAGES_ACCOUNT_ID']
 );
 ```
+###
+
 Then use the api instance to get details about an existing image such as its file name, metadata, or available variants.
 ```php
 $id = '2cdc28f0-017a-49c4-9ed7-87056c83901'
 $data = $api->images()->get($id);
 $data->variants[0]; // https://imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/2cdc28f0-017a-49c4-9ed7-87056c83901/public
 ```
+### 
 
 Or use the api to upload a new image from an image string.
 ```php
@@ -55,6 +59,7 @@ $file = file_get_contents($fileName);
 $data = $api->images()->create($file, $fileName);
 $data->id; // 2cdc28f0-017a-49c4-9ed7-87056c83901
 ```
+### 
 
 Or generate a one time upload url that lets your users upload images directly to cloudflare without exposing your api key.
 ```php
@@ -64,7 +69,7 @@ $data->uploadUrl; // https://upload.imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/d63
 You can find more information about direct creator uploads in the [Cloudflare Docs](https://developers.cloudflare.com/images/cloudflare-images/upload-images/direct-creator-upload/).
 
 ## Using with Laravel
-It's easy to use this package in Laravel. Begin by adding your credentials to your services config file.
+Begin by adding your credentials to your services config file.
 ```php
 // config/services.php
 'cloudflare' => [
@@ -73,6 +78,8 @@ It's easy to use this package in Laravel. Begin by adding your credentials to yo
     'signing_key' => env('CLOUDFLARE_IMAGES_SIGNING_KEY'),
 ],
 ```
+###
+
 Bind the `CloudflareImages` class in a service provider.
 ```php
 // app/Providers/AppServiceProvider.php
@@ -87,12 +94,15 @@ public function register()
     });
 }
 ````
+###
+
 And use anywhere in your application.
 ```php
 $data = app(CloudflareImages::class)->images()->get($id);
 ```
+###
 
-It's also really easy to test your integration using Saloon's amazing [response recording](https://docs.saloon.dev/testing/recording-requests#fixture-path).
+Test your integration using Saloon's amazing [response recording](https://docs.saloon.dev/testing/recording-requests#fixture-path).
 ```php
 use Saloon\Laravel\Saloon; // composer require sammyjo20/saloon-laravel "^2.0"
 ...
@@ -134,6 +144,7 @@ Cloudflare allows you to configure an image to only be accessible with a signed 
 ```php
 $api->images()->private(true)->getUploadUrl();
 ```
+###
 
 To generate signatures instantiate your api with the optional signing key parameter and then pass the url you want to sign to the `signUrl` method.
 ```php
