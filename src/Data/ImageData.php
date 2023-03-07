@@ -17,7 +17,8 @@ final class ImageData
         public string $uploaded,
         public bool $requireSignedURLs,
         public array $variants,
-        public array $metadata
+        public array $metadata,
+        public bool $isDraft,
     ) {
     }
 
@@ -35,6 +36,7 @@ final class ImageData
             requireSignedURLs: $data['requireSignedURLs'],
             variants: $data['variants'],
             metadata: $data['meta'] ?? [],
+            isDraft: $data['draft'] ?? false,
         );
     }
 }
