@@ -83,7 +83,7 @@ test('image update', function () {
         ->toBe('00000000-0000-0000-0000-000000000000');
 });
 
-test('image uploadFromUrl', function () {
+test('image createFromUrl', function () {
     $mockClient = new MockClient([
         PostImage::class => MockResponse::fixture('postImage'),
     ]);
@@ -91,7 +91,7 @@ test('image uploadFromUrl', function () {
     $connector = getConnector();
     $connector->withMockClient($mockClient);
 
-    $data = $connector->images()->uploadFromUrl('https://example.com/image.jpg');
+    $data = $connector->images()->createFromUrl('https://example.com/image.jpg');
 
     expect($data->id)
         ->toBe('00000000-0000-0000-0000-000000000000');
@@ -129,7 +129,7 @@ test('image uploadFromString', function () {
 
     $data = $connector
         ->images()
-        ->upload(base64_decode($base64), 'test.png');
+        ->create(base64_decode($base64), 'test.png');
 
     expect($data->id)
         ->toBe('00000000-0000-0000-0000-000000000000');

@@ -5,22 +5,22 @@ This is a framework-agnostic PHP client for [Cloudflare Images](https://develope
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/benbjurstrom/cloudflare-images-php/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/benbjurstrom/cloudflare-images-php/actions?query=workflow%3tests+branch%3Amain)
 
 ## Table of contents
-- [Quick Start](https://github.com/benbjurstrom/cloudflare-images-php#quick-start)
+- [Quick Start](https://github.com/benbjurstrom/cloudflare-images-php#-quick-start)
 - [Using with Laravel](https://github.com/benbjurstrom/cloudflare-images-php#using-with-laravel)
 - [Response Data](https://github.com/benbjurstrom/cloudflare-images-php#response-data)
-- [Image Metadata](https://github.com/benbjurstrom/cloudflare-images-php#private-images)
-- [Private Images](https://github.com/benbjurstrom/cloudflare-images-php#private-images)
+- [Image Metadata](https://github.com/benbjurstrom/cloudflare-images-php#image-metadata)
+- [Private Images](https://github.com/benbjurstrom/cloudflare-images-php#response-data)
 - [Custom IDs](https://github.com/benbjurstrom/cloudflare-images-php#custom-ids)
-- [Image Methods](https://github.com/benbjurstrom/cloudflare-images-php#custom-ids)
-  - [get]()
-  - [list]()
-  - [update]()
-  - [delete]()
-  - [create]()
-  - [createFromUrl]()
-  - [getUploadUrl]()
-- [Variant Methods](https://github.com/benbjurstrom/cloudflare-images-php#variant-methods)
-  - [list](https://github.com/benbjurstrom/cloudflare-images-php#get-all-variants)
+- [Image Methods](https://github.com/benbjurstrom/cloudflare-images-php#available-image-methods)
+  - [get](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#get)
+  - [list](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#list)
+  - [update](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#update)
+  - [delete](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#delete)
+  - [create](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#create)
+  - [createFromUrl](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#createfromurl)
+  - [getUploadUrl](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#getuploadurl)
+- [Variant Methods](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#variant-methods)
+  - [list](https://github.com/benbjurstrom/cloudflare-images-php/tree/9-rename-methods#list-1)
 
 ## 🚀 Quick start
 
@@ -120,8 +120,16 @@ All responses are returned as data objects. Detailed information can be found by
 * [UploadUrlData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/UploadUrlData.php)
 * [VariantData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/VariantData.php)
 
+## Image Metadata
+Cloudflare allows you attach a modifiable key-value store to your images. To attach metadata to your image chain `withMetadata($metadata)` onto your api instance before calling the `create`, `createFromUrl`, `update`, or `getUploadUrl` methods. For example:
+
+```php
+$url = 'https://en.wikipedia.org/wiki/File:Example.jpg'
+$api->images()->withMetadata(['user_id' => '123'])->createFromUrl($url);
+```
+
 ## Private Images
-Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private chain `private(true)` onto your api instance before calling the `getUploadUrl`, `createFromUrl`, or `update` methods. For example:
+Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private chain `private(true)` onto your api instance before calling the `create`, `createFromUrl`, `update`, or `getUploadUrl` methods. For example:
 
 ```php
 $api->images()->private(true)->getUploadUrl();
@@ -141,7 +149,7 @@ $api->signUrl($url); // https://imagedelivery.net/2222222222222222222222/0000000
 You can find more information about serving private images in the [Cloudflare documentation](https://developers.cloudflare.com/images/cloudflare-images/signing-images/).
 
 ## Custom IDs
-Cloudflare allows you to configure a custom identifier if you wish. To do so chain `withCustomId($id)` onto your api instance before calling the `getUploadUrl`, `createFromUrl`, or `update` methods. For example:
+Cloudflare allows you to configure a custom identifier if you wish. To do so chain `withCustomId($id)` onto your api instance before calling the `create`, `createFromUrl`, or `getUploadUrl` methods. For example:
 
 ```php
 $api->images()->withCustomId('test/image123')->create($file, $fileName);
