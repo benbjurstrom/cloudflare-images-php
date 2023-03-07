@@ -27,10 +27,10 @@ Then use the api instance to get details about an image such as its file name, m
 use BenBjurstrom\CloudflareImages\Data\ImageData;
 ...
 
-$id = '00000000-0000-0000-0000-000000000000'
+$id = '2cdc28f0-017a-49c4-9ed7-87056c83901'
 /* @var ImageData $data */
 $data = $api->images()->get($id);
-$data->variants[0]; // https://imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000/public
+$data->variants[0]; // https://imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/2cdc28f0-017a-49c4-9ed7-87056c83901/public
 ```
 
 Or upload from an image string.
@@ -43,9 +43,10 @@ $file = file_get_contents($fileName);
 /* @var ImageData $data */
 $data = $api->images()
     ->private(false) // optional
+    ->withCustomId('test/image123') // optional
     ->withMetadata(['user_id' => '123']) // optional
     ->upload($file, $fileName);
-$data->id; // 00000000-0000-0000-0000-000000000000
+$data->id; // test/image123
 ```
 
 Or generate a one time upload url that lets your users upload images directly to cloudflare without exposing your api key.
@@ -55,14 +56,65 @@ use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
 
 /* @var UploadUrlData $data */
 $data = $api->images()
-    ->private(false) // optional
     ->withMetadata(['user_id' => '123']) // optional
     ->getUploadUrl();
-$data->uploadUrl; // https://upload.imagedelivery.net/2222222222222222222222/00000000-0000-0000-0000-000000000000"
-
+$data->uploadUrl; // https://upload.imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/d63a6953-12b9-4d89-b8d6-083c86289b93
 ```
 
 You can find more information about direct creator uploads in the [Cloudflare Docs](https://developers.cloudflare.com/images/cloudflare-images/upload-images/direct-creator-upload/).
+
+## Using Laravel?
+Add your credentials to your services config file.
+```php
+// config/services.php
+'cloudflare' => [
+    'api_token' => env('CLOUDFLARE_IMAGES_API_TOKEN'),
+    'account_id' => env('CLOUDFLARE_IMAGES_ACCOUNT_ID'),
+    'signing_key' => env('CLOUDFLARE_IMAGES_SIGNING_KEY'),
+],
+```
+Bind the `CloudflareImages` class in a service provider.
+```php
+// app/Providers/AppServiceProvider.php
+public function register()
+{
+    parent::register();
+
+    $this->app->bind(CloudflareImages::class, function () {
+        return new CloudflareImages(
+            apiToken: config('services.cloudflare.api_token'),
+            accountId: config('services.cloudflare.account_id'),
+            signingKey: config('services.cloudflare.signing_key'),
+        );
+    });
+}
+````
+And use in your app
+```php
+$imgData = app(CloudflareImages::class)
+            ->images()
+            ->get($this->id);
+```
+
+Then it's easy to mock the api in your tests using Saloon's amazing [Response Recording](https://docs.saloon.dev/testing/recording-requests#fixture-path).
+```php
+use Saloon\Laravel\Saloon;
+...
+Saloon::fake([
+    MockResponse::fixture('getImage'),
+]);
+
+$id = 'a74a4313-a51d-4837-b5c1-73e4c562ff00';
+
+// The initial request will check if a fixture called "getImage" 
+// exists. Because it doesn't exist yet, the real request will be
+// sent and the response will be recorded .
+$imgData = app(CloudflareImages::class)->images()->get($id);
+
+// However, the next time the request is made, the fixture will 
+// exist, and Saloon will not make the request again.
+$imgData = app(CloudflareImages::class)->images()->get($this->id);
+```
 
 ## Response Data
 All responses are returned as data objects. Detailed information on the available data can be found by inspecting the following class properties:
@@ -73,7 +125,7 @@ All responses are returned as data objects. Detailed information on the availabl
 * [VariantData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/VariantData.php)
 
 ## Private Images
-Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private, chain `private(true)` onto your api intance before calling the `getUploadUrl`, `uploadFromUrl`, or `update` methods. For example:
+Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private chain `private(true)` onto your api instance before calling the `getUploadUrl`, `uploadFromUrl`, or `update` methods. For example:
 
 ```php
 $api->images()->private(true)->getUploadUrl();
@@ -91,6 +143,15 @@ $api->signUrl($url); // https://imagedelivery.net/2222222222222222222222/0000000
 ```
 
 You can find more information about serving private images in the [Cloudflare documentation](https://developers.cloudflare.com/images/cloudflare-images/signing-images/).
+
+## Custom IDs
+Cloudflare allows you to configure a custom identifier if you wish. To do so chain `withCustomId($id)` onto your api instance before calling the `getUploadUrl`, `uploadFromUrl`, or `update` methods. For example:
+
+```php
+$api->images()->withCustomId($id)->getUploadUrl();
+```
+
+Note that images with a custom ID cannot be made private. You can find more information about custom ids in the [Cloudflare documentation](https://developers.cloudflare.com/images/cloudflare-images/upload-images/custom-id/).
 
 ## Other Image Methods
 ### Get A Paginated List of Images
@@ -129,7 +190,7 @@ $data = $api->images()
 use BenBjurstrom\CloudflareImages\Data\ImageData
 ...
 
-$id = '00000000-0000-0000-0000-000000000000'
+$id = 'd63a6953-12b9-4d89-b8d6-083c86289b93'
 
 /* @var ImageData $data */
 $data = $api->images()
@@ -141,7 +202,7 @@ $data->id; // Contains a new id if the privacy setting was changed. If you are t
 ```
 ### Delete Image
 ```php
-$id = '00000000-0000-0000-0000-000000000000'
+$id = 'd63a6953-12b9-4d89-b8d6-083c86289b93'
 $data = $api->images()->delete($id);
 $data // true
 ```
