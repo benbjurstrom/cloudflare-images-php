@@ -52,7 +52,7 @@ Or use the api to upload a new image from an image string.
 $fileName = 'example.jpg';
 $file = file_get_contents($fileName);
 
-$data = $api->images()->upload($file, $fileName);
+$data = $api->images()->create($file, $fileName);
 $data->id; // 2cdc28f0-017a-49c4-9ed7-87056c83901
 ```
 
@@ -121,7 +121,7 @@ All responses are returned as data objects. Detailed information can be found by
 * [VariantData](https://github.com/benbjurstrom/cloudflare-images-php/blob/main/src/Data/VariantData.php)
 
 ## Private Images
-Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private chain `private(true)` onto your api instance before calling the `getUploadUrl`, `uploadFromUrl`, or `update` methods. For example:
+Cloudflare allows you to configure an image to only be accessible with a signed URL token. To make an image private chain `private(true)` onto your api instance before calling the `getUploadUrl`, `createFromUrl`, or `update` methods. For example:
 
 ```php
 $api->images()->private(true)->getUploadUrl();
@@ -141,18 +141,29 @@ $api->signUrl($url); // https://imagedelivery.net/2222222222222222222222/0000000
 You can find more information about serving private images in the [Cloudflare documentation](https://developers.cloudflare.com/images/cloudflare-images/signing-images/).
 
 ## Custom IDs
-Cloudflare allows you to configure a custom identifier if you wish. To do so chain `withCustomId($id)` onto your api instance before calling the `getUploadUrl`, `uploadFromUrl`, or `update` methods. For example:
+Cloudflare allows you to configure a custom identifier if you wish. To do so chain `withCustomId($id)` onto your api instance before calling the `getUploadUrl`, `createFromUrl`, or `update` methods. For example:
 
 ```php
-$api->images()->withCustomId('test/image123')->upload($file, $fileName);
+$api->images()->withCustomId('test/image123')->create($file, $fileName);
 $data->id; // test/image123
 ```
 
 Note that images with a custom ID cannot be made private. You can find more information about custom ids in the [Cloudflare documentation](https://developers.cloudflare.com/images/cloudflare-images/upload-images/custom-id/).
 
 ## Available Image Methods
-### Get A Paginated List of Images
+### get()
+Use to get details about an image such as its file name, metadata, and available variants. Returns an ImageData object.
+```php
+use BenBjurstrom\CloudflareImages\Data\ImageData;
+...
+$id = '2cdc28f0-017a-49c4-9ed7-87056c83901'
+/* @var ImageData $data */
+$data = $api->images()->get($id);
+$data->variants[0]; // https://imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/2cdc28f0-017a-49c4-9ed7-87056c83901/public
+```
 
+### list()
+Use to get a paginated list of images. Returns an ImagesData object.
 ```php
 use BenBjurstrom\CloudflareImages\Data\ImagesData
 ...
@@ -166,7 +177,25 @@ $data = $api->images()->list(
 $data->images[0]->id; // 00000000-0000-0000-0000-000000000000
 
 ```
-### Upload From Url
+### create()
+Use to upload an image from an image string. Returns an ImageData object.
+```php
+use BenBjurstrom\CloudflareImages\Data\ImageData;
+...
+$fileName = 'example.jpg';
+$file = file_get_contents($fileName);
+
+/* @var ImageData $data */
+$data = $api->images()
+    ->private(false) // optional
+    ->withCustomId('test/image123') // optional
+    ->withMetadata(['user_id' => '123']) // optional
+    ->create($file, $fileName);
+$data->id; // test/image123
+```
+
+### createFromUrl()
+Use to add an image to Cloudflare from a given url. Returns an ImageData object.
 ```php
 use BenBjurstrom\CloudflareImages\Data\ImageData
 ...
@@ -177,9 +206,10 @@ $url = 'https://en.wikipedia.org/wiki/File:Example.jpg'
 $data = $api->images()
     ->private(false) // optional
     ->withMetadata(['user_id' => '123']) // optional
-    ->uploadFromUrl($id);
+    ->createFromUrl($id);
 ```
-### Update Image
+### update()
+Use to update an image's metadata or privacy setting. Returns an ImageData object.
 
 ⚠️ WARNING - Modifying an image's privacy setting will change the image's identifier.
 
@@ -197,15 +227,32 @@ $data = $api->images()
 
 $data->id; // Contains a new id if the privacy setting was changed. If you are tracking IDs be sure to update your database.
 ```
-### Delete Image
+### delete()
+Use to delete an image. Returns a boolean.
 ```php
 $id = 'd63a6953-12b9-4d89-b8d6-083c86289b93'
 $data = $api->images()->delete($id);
 $data // true
 ```
 
+### getUploadUrl()
+Use to generate a one time upload url that lets your users upload images directly to cloudflare without exposing your api key. Returns an UploadUrlData object.
+```php
+use BenBjurstrom\CloudflareImages\Data\UploadUrlData;
+...
+
+/* @var UploadUrlData $data */
+$data = $api->images()
+    ->withMetadata(['user_id' => '123']) // optional
+    ->getUploadUrl();
+$data->uploadUrl; // https://upload.imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/d63a6953-12b9-4d89-b8d6-083c86289b93
+```
+
+You can find more information about direct creator uploads in the [Cloudflare Docs](https://developers.cloudflare.com/images/cloudflare-images/upload-images/direct-creator-upload/).
+
 ## Variant Methods
-### Get All Variants
+### list()
+Use to get a list of all variants. Returns a VariantsData object.
 ```php
 use BenBjurstrom\CloudflareImages\Data\VariantsData
 ...
