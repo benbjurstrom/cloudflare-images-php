@@ -17,7 +17,7 @@ test('image delete', function () {
         ->withCustomId('97ed2d63-d1e3-43ca-95dd-35192ce278c7')
         ->createFromUrl('https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg');
 
-//    $signed = $api->signUrl('https://imagedelivery.net/tlMUIgxBCDMUcIu6pbnihg/058aae72-20b6-4eb5-c75c-dd0ca9e87601/public');
+    //    $signed = $api->signUrl('https://imagedelivery.net/tlMUIgxBCDMUcIu6pbnihg/058aae72-20b6-4eb5-c75c-dd0ca9e87601/public');
 
     dd($data);
     // dd($signed);

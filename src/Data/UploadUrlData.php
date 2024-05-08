@@ -19,7 +19,7 @@ final class UploadUrlData
             throw new \Exception('Invalid response');
         }
 
-        return new static(
+        return new self(
             id: $data['id'],
             uploadUrl: $data['uploadURL'],
         );

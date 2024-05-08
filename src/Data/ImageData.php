@@ -29,7 +29,7 @@ final class ImageData
             throw new Exception('Invalid response');
         }
 
-        return new static(
+        return new self(
             id: $data['id'],
             filename: $data['filename'],
             uploaded: $data['uploaded'],

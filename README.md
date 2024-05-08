@@ -2,7 +2,7 @@
 This is a framework-agnostic PHP client for [Cloudflare Images](https://developers.cloudflare.com/images/cloudflare-images/) built on the amazing [Saloon v2](https://docs.saloon.dev/) 🤠 library.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/benbjurstrom/cloudflare-images-php.svg?style=flat-square)](https://packagist.org/packages/benbjurstrom/cloudflare-images-php)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/benbjurstrom/cloudflare-images-php/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/benbjurstrom/cloudflare-images-php/actions?query=workflow%3tests+branch%3Amain)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/benbjurstrom/replicate-php/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/benbjurstrom/cloudflare-images-php/actions?query=workflow%3tests+branch%3Amain)
 
 ## Table of contents
 - [Quick Start](https://github.com/benbjurstrom/cloudflare-images-php#-quick-start)
@@ -31,7 +31,7 @@ composer require benbjurstrom/cloudflare-images-php
 ```
 ### 
 
-Use your Cloudflare API token and Account ID to create a new api instance.
+Create a new api instance.
 ```php
 use BenBjurstrom\CloudflareImages\CloudflareImages;
 ...
@@ -43,7 +43,7 @@ $api = new CloudflareImages(
 ```
 ###
 
-Then use the api instance to get details about an existing image such as its file name, metadata, or available variants.
+Then use it to get details about an existing image.
 ```php
 $id = '2cdc28f0-017a-49c4-9ed7-87056c83901'
 $data = $api->images()->get($id);
@@ -51,7 +51,7 @@ $data->variants[0]; // https://imagedelivery.net/Vi7wi5KSItxGFsWRG2Us6Q/2cdc28f0
 ```
 ### 
 
-Or use the api to upload a new image from an image string.
+Or to upload a new image from an image string.
 ```php
 $fileName = 'example.jpg';
 $file = file_get_contents($fileName);
